@@ -1,95 +1,127 @@
-import React, { useEffect, useState, useRef } from "react";
-import "./App.css";
+import React, { useState, useEffect } from "react";
 
-const APICalling = async () => {
-  try {
-    const res = await fetch("https://xcountries-backend.azurewebsites.net/all");
-
-    if (res.status != 200) {
-      throw new Error(`error ${res.status}`);
-    }
-    if (res.status === 200) {
-      const resCount = await res.json();
-      console.log("resCount", resCount);
-      return resCount;
-    }
-  } catch (error) {
-    console.error("Error fetching data :", error.message);
-    throw error;
-  }
-};
-const Card = ({ flag, name }) => {
-  return (
-    <div className="card">
-      <img src={flag} alt={flag} className="flagimg" />
-      <div>{name}</div>
-    </div>
-  );
-};
-
-const Xcountries = () => {
-  const [data, setData] = useState([]);
-  const [page, setPage] = useState(1); // Tracks the current page
-  const [isFetching, setIsFetching] = useState(false); // Tracks fetch status
-  const loader = useRef(null); // Reference for the loader div
+const LocationSelector = () => {
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
 
   useEffect(() => {
-    fetchData(page); // Load initial data
-  }, [page]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setIsFetching(true);
+    // Fetch countries on initial render
+    fetch("https://crio-location-selector.onrender.com/countries")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
         }
-      },
-      {
-        root: null,
-        rootMargin: "0px",
-        threshold: 1.0,
-      }
-    );
-
-    if (loader.current) {
-      observer.observe(loader.current);
-    }
-
-    return () => {
-      if (loader.current) {
-        observer.unobserve(loader.current);
-      }
-    };
+        return response.json();
+      })
+      .then((data) => setCountries(data))
+      .catch((error) => console.error("Error fetching countries:", error));
   }, []);
 
-  useEffect(() => {
-    if (isFetching) {
-      fetchData(page);
-    }
-  }, [isFetching]);
+  const handleCountryChange = (country) => {
+    setSelectedCountry(country);
+    setSelectedState("");
+    setSelectedCity("");
+    setStates([]);
+    setCities([]);
 
-  const fetchData = async (currentPage) => {
-    try {
-      const APIResponse = await APICalling(currentPage); // Adjust API for pagination
-      setData((prevData) => [...prevData, ...APIResponse]);
-      setPage((prevPage) => prevPage + 1);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setIsFetching(false);
-    }
+    // Fetch states for the selected country
+    fetch(
+      `https://crio-location-selector.onrender.com/country=${country}/states`
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => setStates(data))
+      .catch((error) => console.error("Error fetching states:", error));
+  };
+
+  const handleStateChange = (state) => {
+    setSelectedState(state);
+    setSelectedCity("");
+    setCities([]);
+
+    // Fetch cities for the selected state
+    fetch(
+      `https://crio-location-selector.onrender.com/country=${selectedCountry}/state=${state}/cities`
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => setCities(data))
+      .catch((error) => console.error("Error fetching cities:", error));
+  };
+
+  const handleCityChange = (city) => {
+    setSelectedCity(city);
   };
 
   return (
-    <div className="parentCard">
-      {data.map((item, index) => (
-        <div key={index}>
-          <Card name={item.name} flag={item.flag} />
-        </div>
-      ))}
-      <div ref={loader} className="loader">
-        {isFetching && <p>Loading more countries...</p>}
-      </div>
+    <div className="p-4">
+      <h1 className="text-lg font-bold mb-4">Location Selector</h1>
+
+      {/* Country Dropdown */}
+      <label className="block mb-2">Select Country:</label>
+      <select
+        className="block w-full mb-4 p-2 border rounded"
+        value={selectedCountry}
+        onChange={(e) => handleCountryChange(e.target.value)}
+      >
+        <option value="">-- Select Country --</option>
+        {countries.map((country) => (
+          <option key={country} value={country}>
+            {country}
+          </option>
+        ))}
+      </select>
+
+      {/* State Dropdown */}
+      <label className="block mb-2">Select State:</label>
+      <select
+        className="block w-full mb-4 p-2 border rounded"
+        value={selectedState}
+        onChange={(e) => handleStateChange(e.target.value)}
+        disabled={!selectedCountry}
+      >
+        <option value="">-- Select State --</option>
+        {states.map((state) => (
+          <option key={state} value={state}>
+            {state}
+          </option>
+        ))}
+      </select>
+
+      {/* City Dropdown */}
+      <label className="block mb-2">Select City:</label>
+      <select
+        className="block w-full mb-4 p-2 border rounded"
+        value={selectedCity}
+        onChange={(e) => handleCityChange(e.target.value)}
+        disabled={!selectedState}
+      >
+        <option value="">-- Select City --</option>
+        {cities.map((city) => (
+          <option key={city} value={city}>
+            {city}
+          </option>
+        ))}
+      </select>
+
+      {/* Display Selected Location */}
+      {selectedCountry && selectedState && selectedCity && (
+        <p className="mt-4 text-green-600 font-medium">
+          You selected {selectedCity}, {selectedState}, {selectedCountry}
+        </p>
+      )}
     </div>
   );
 };
@@ -97,7 +129,7 @@ const Xcountries = () => {
 function App() {
   return (
     <>
-      <Xcountries />
+      <LocationSelector />
     </>
   );
 }
