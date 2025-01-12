@@ -133,7 +133,7 @@ const NameForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    e;
+
     if (firstName.trim() && lastName.trim()) {
       setFullName(`${firstName.trim()} ${lastName.trim()}`);
     } else {
