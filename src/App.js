@@ -126,52 +126,68 @@ const LocationSelector = () => {
   );
 };
 
-const DisplayName = () => {
-  const [fistName, setFirstName] = useState("");
+const NameForm = () => {
+  const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [showName, setShowName] = useState(false);
+  const [fullName, setFullName] = useState("");
 
-  const handleSubmit = () => {
-    if (fistName && lastName) {
-      setShowName(true);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    e;
+    if (firstName.trim() && lastName.trim()) {
+      setFullName(`${firstName.trim()} ${lastName.trim()}`);
+    } else {
+      setFullName(null);
     }
   };
+
   return (
-    <>
+    <div>
+      {/* Initial Page Render */}
+      <h1>Enter Your Name</h1>
+      <form onSubmit={handleSubmit}>
+        {/* Input Fields */}
+        <div>
+          <label htmlFor="firstName">First Name:</label>
+          <input
+            id="firstName"
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="Enter first name"
+          />
+        </div>
+        <div>
+          <label htmlFor="lastName">Last Name:</label>
+          <input
+            id="lastName"
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Enter last name"
+          />
+        </div>
+
+        {/* Submit Button */}
+        <button type="submit">Submit</button>
+      </form>
+
+      {/* Display Full Name */}
       <div>
-        <label>First Name</label>
-        <input
-          type="text"
-          placeholder=""
-          onChange={(e) => setFirstName(e.target.value)}
-        />
+        {fullName ? (
+          <p>Your full name is: {fullName}</p>
+        ) : (
+          <p>Please fill out both fields to display your full name.</p>
+        )}
       </div>
-
-      <div>
-        <label>Last Name</label>
-        <input
-          type="text"
-          placeholder=""
-          onChange={(e) => setLastName(e.target.value)}
-        />
-      </div>
-
-      <button onClick={handleSubmit}>submit</button>
-
-      {showName && (
-        <>
-          Full Name {fistName}
-          {lastName}
-        </>
-      )}
-    </>
+    </div>
   );
 };
 
 function App() {
   return (
     <>
-      <DisplayName />
+      <NameForm />
     </>
   );
 }
