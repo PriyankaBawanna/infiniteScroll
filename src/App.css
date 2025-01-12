@@ -1,0 +1,26 @@
+.card {
+  width: 90px;
+  height: 90px;
+  border: 1px solid black;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+.parentCard {
+  width: 100%;
+  height: auto;
+  border: 1px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.flagimg {
+  width: 56px;
+  height: 56px;
+}
