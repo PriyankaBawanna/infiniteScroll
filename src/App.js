@@ -126,10 +126,52 @@ const LocationSelector = () => {
   );
 };
 
+const DisplayName = () => {
+  const [fistName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [showName, setShowName] = useState(false);
+
+  const handleSubmit = () => {
+    if (fistName && lastName) {
+      setShowName(true);
+    }
+  };
+  return (
+    <>
+      <div>
+        <label>First Name</label>
+        <input
+          type="text"
+          placeholder=""
+          onChange={(e) => setFirstName(e.target.value)}
+        />
+      </div>
+
+      <div>
+        <label>Last Name</label>
+        <input
+          type="text"
+          placeholder=""
+          onChange={(e) => setLastName(e.target.value)}
+        />
+      </div>
+
+      <button onClick={handleSubmit}>submit</button>
+
+      {showName && (
+        <>
+          Full Name {fistName}
+          {lastName}
+        </>
+      )}
+    </>
+  );
+};
+
 function App() {
   return (
     <>
-      <LocationSelector />
+      <DisplayName />
     </>
   );
 }
